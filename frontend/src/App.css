@@ -1,0 +1,133 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.GroceriesApp-Container {
+  display: flex;
+  justify-content: space-around;
+  max-width: 800px;
+  min-width: 550px;
+}
+
+.CartList-Container {
+  width: 25%;
+  justify-content: center;
+  /* border: 1px solid white; */
+}
+
+.CartList-Card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border: 2px wheat solid;
+  border-radius: 10px;
+  margin: 10px;
+  padding: 5px;
+}
+
+.CartList-Card-Info {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom:3px;
+}
+
+.Inventory-Container {
+  width: 75%;
+  max-width: 800px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* border: 1px solid white; */
+}
+
+form {
+  width: 33%;
+
+}
+
+/* -----   FROM HERE I HANDLE HOW PRODUCT CARDS FORMAT    ---- */
+.Inventory-Card{
+  width:25%;
+  border: 2px wheat solid;
+  border-radius: 10px;
+  margin: 10px;
+  padding: 15px 0px 15px;
+  font-weight: 700;
+}
+.Inventory-Card button {
+  /* margin:15px 0px 5px; */
+}
+
+.Inventory-Card button:nth-of-type(1){  /* better refer to it by its name, button*/
+/*   position:relative;
+  top:65%;
+  margin:5px 0px 5px; */
+}
+/* Buttons container */
+#button-container {
+  position:relative;
+  top:70%;
+}
+
+/* Increasing font size for product name */
+.Inventory-Card  div:nth-of-type(2){
+  font-size: 1.3em;
+}
+/* quantity font is thinner */
+.Inventory-Card  div:nth-of-type(4){
+ font-weight: 100;
+}
+/*moving price up*/
+.Inventory-Card  div:nth-of-type(5){
+  position: relative;
+  top: -32%
+ }
+/* lowering data to make room for image on top */
+.Inventory-data{
+  position: relative;
+  top:0%;
+}
+/* added some atributes to position images
+correctly */
+img {
+  height: 50px;
+  border-radius: 5px;
+  position: relative;
+  bottom:60%;
+}
+
+/* ----- FROM HERE, ELEMENTS IN CART ARE FORMATTED --------*/
+.counter-container {
+  /* border: 1px solid white; */
+  display: flex;
+  width: 70%;
+  height: 20px;
+  justify-content: space-around;
+  align-items: center;
+  margin: 5px auto;
+}
+
+.counter-button {
+  width: 15px;
+  height: 15px;
+  border: 1px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.CartList-Buttons {
+  display: flex;
+  justify-content: space-around;
+}
+
+.Remove-Button {
+  background-color: rgb(190, 0, 0);
+}
+
+#Buy-Button {
+  background-color: green;
+}
+
