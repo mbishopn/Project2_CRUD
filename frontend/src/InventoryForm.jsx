@@ -3,8 +3,9 @@
 import { appendErrors } from "react-hook-form";
 
 
-export default function InventoryForm({formData, handleOnChange, handleOnSubmit, editFlag, handleOnEdit, handleOnUpdate, register, handleSubmit, errors, clearErrors }) {
-
+export default function InventoryForm({formData, handleOnChange, handleOnSubmit, editFlag, handleOnEdit, handleOnUpdate, register, handleSubmit, errors}) {
+    console.log(editFlag?"editando...":"edicion cancelada")
+    console.log("esto hay en el formulario");console.log(formData)
     return (
         <div>
             <form action=""  /* onSubmit={handleSubmit(editFlag?{handleOnSubmit }:{handleOnUpdate})} */ >

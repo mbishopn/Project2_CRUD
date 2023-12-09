@@ -27,6 +27,7 @@ export default function GroceriesApp()
     const [products, setProducts] = useState([]);       // hook to hold all products
     const emptyForm =                                   // this is my form template object
     {
+        _id:"",
         id: "",
         productName: "",
         brand: "",
@@ -38,7 +39,15 @@ export default function GroceriesApp()
     const [formData, setFormData] = useState(emptyForm);    // wanna control what happen in my form
     const [APIResponse, setAPIResponse] = useState("")      // Used to re-render every time API answers something
     const[editFlag,setEditFlag]=useState(false)             // flag to toggle form buttons for add/edit
-    const {register,handleSubmit, clearErrors, formState:{errors}}=useForm();
+    const {register,handleSubmit, clearErrors, reset, setValue, getValues, formState:{errors}}=useForm({
+        defaultValues:{         // let's define default values for the form
+            productName:"",
+            brand:"",
+            quantity:"",
+            image:"",
+            price:"",
+        }
+    });
 
     //2 -- now I need a callback function to use it with effect
     // I want this function to be executed only the firstime or when I change something in the DB ONLY!!
@@ -126,7 +135,8 @@ export default function GroceriesApp()
             .then((response) => {
                 console.log(response)
                 setAPIResponse(<>{response[0].data}</>)
-                setFormData(emptyForm)
+                reset()
+                //setFormData(emptyForm)
                 // window.alert(response[0].data + " Id: " + response[1])
             })
     }
@@ -140,28 +150,42 @@ export default function GroceriesApp()
     {
         evt.preventDefault                // don't refresh
         console.log(evt)
+        console.log("estoy cancelando")
         const pid = evt.target.value        // which button called this function?
         if (pid === "cancel")          // CANCEL button? no problema, get back to normal
         {
             setEditFlag(!editFlag)
-            setFormData(emptyForm)
+            //reset()
+            setFormData(()=>{reset(); return emptyForm}) // clean form and formData variable
             clearErrors()
+            console.log(formData)
+            console.log(getValues())
         }
         else 
         {
-            {setEditFlag(true)}         // EDIT button from InventoryCards?
+            setEditFlag(true)         // EDIT button from InventoryCards?
             const editar = products.filter((res) => (res._id === pid))  // then grab the produc info from the card (products object)
             const dato = {                              // create another object with the product data to be put in the form
                 _id:editar[0]._id,
                 id:editar[0].id,
-                productName: editar[0].productName,
-                brand: editar[0].brand,
-                quantity: editar[0].quantity,
-                image: editar[0].image,
-                price: editar[0].price,
+                // productName: editar[0].productName,
+                // brand: editar[0].brand,
+                // quantity: editar[0].quantity,
+                // image: editar[0].image,
+                // price: editar[0].price,
             }
-            setFormData(() => { return dato })                  // let's use our setFormData to modify our hook/state formData
+            setFormData(() => {  // let's use our setFormData to modify our hook/state formData
+                
+                setValue("productName",editar[0].productName)
+                setValue("brand",editar[0].brand)
+                setValue("quantity",editar[0].quantity)
+                setValue("image",editar[0].image)
+                setValue("price",editar[0].price)
+                return {...dato,...getValues()} })                 
+
             document.getElementById("productName").focus()      // please take me to the form, I'm lazy
+            console.log(formData)
+           // console.log(getValues())
         }
     }
 
@@ -170,12 +194,14 @@ export default function GroceriesApp()
     
     const handleOnUpdate = async (evt) => 
     {
-        evt.preventDefault                // don't refresh
+        
+       // evt.preventDefault()                // don't refresh
             await updateProduct(formData)   // call the API to update the product
                 .then((response) => {
                     setAPIResponse(<>{response.data}</>)  // how was it?
                 })
-                setFormData(emptyForm)      // clean the form
+                reset()
+                setFormData(()=>{reset(); return emptyForm})      // clean the form
                 setEditFlag(!editFlag)      // once updated, we get back to normal add button
             
     }
@@ -210,7 +236,8 @@ export default function GroceriesApp()
                 register={register}                 // from react-hook-form 
                 handleSubmit={handleSubmit}
                 errors={errors}
-                clearErrors={clearErrors} /> 
+                clearErrors={clearErrors}
+                reset={reset} /> 
             <p>{APIResponse}</p>
             <div className="GroceriesApp-Container">
                 {
