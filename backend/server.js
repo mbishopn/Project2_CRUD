@@ -62,7 +62,7 @@ server.patch("/updateProduct/:id", async (request, response) => {
     console.log(product)
     delete product._id              // I have to delete this Id here, otherwise can't commit the update.
     const update = await Product.findByIdAndUpdate(id, product )
-    update?response.send("Product upated"):response.send("Updating failed")
+    update?response.send("Product updated"):response.send("Update failed")
 })
 
 // deleting Items, by Id

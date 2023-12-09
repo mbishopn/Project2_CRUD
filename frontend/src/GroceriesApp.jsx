@@ -18,6 +18,7 @@ import CartList from "./cartList.jsx"                   // component rendering c
 import InventoryCards from "./inventoryCards.jsx"       // component rendering inventory
 import { readProduct, createProduct, updateProduct, deleteProduct } from "./api/crud" // my crud functions file, axios object is called from there
 import InventoryForm from "./InventoryForm.jsx"         // our new form to add and edit products
+import {useForm} from "react-hook-form"
 
 export default function GroceriesApp()
 {
@@ -37,6 +38,7 @@ export default function GroceriesApp()
     const [formData, setFormData] = useState(emptyForm);    // wanna control what happen in my form
     const [APIResponse, setAPIResponse] = useState("")      // Used to re-render every time API answers something
     const[editFlag,setEditFlag]=useState(false)             // flag to toggle form buttons for add/edit
+    const {register,handleSubmit, clearErrors, formState:{errors}}=useForm();
 
     //2 -- now I need a callback function to use it with effect
     // I want this function to be executed only the firstime or when I change something in the DB ONLY!!
@@ -119,7 +121,7 @@ export default function GroceriesApp()
     // this one post the new product to the backend API, which will update the DB
 
     const handleOnSubmit = async (evt) => {
-        evt.preventDefault()
+        evt.preventDefault
         await createProduct(formData)
             .then((response) => {
                 console.log(response)
@@ -127,6 +129,55 @@ export default function GroceriesApp()
                 setFormData(emptyForm)
                 // window.alert(response[0].data + " Id: " + response[1])
             })
+    }
+
+
+
+    // -------------------- handleOnEdit FUNCTION ----------------------------------------
+    // this one send an item to be updated to the backend API, which will update the DB
+    
+    const handleOnEdit = async (evt) => 
+    {
+        evt.preventDefault                // don't refresh
+        console.log(evt)
+        const pid = evt.target.value        // which button called this function?
+        if (pid === "cancel")          // CANCEL button? no problema, get back to normal
+        {
+            setEditFlag(!editFlag)
+            setFormData(emptyForm)
+            clearErrors()
+        }
+        else 
+        {
+            {setEditFlag(true)}         // EDIT button from InventoryCards?
+            const editar = products.filter((res) => (res._id === pid))  // then grab the produc info from the card (products object)
+            const dato = {                              // create another object with the product data to be put in the form
+                _id:editar[0]._id,
+                id:editar[0].id,
+                productName: editar[0].productName,
+                brand: editar[0].brand,
+                quantity: editar[0].quantity,
+                image: editar[0].image,
+                price: editar[0].price,
+            }
+            setFormData(() => { return dato })                  // let's use our setFormData to modify our hook/state formData
+            document.getElementById("productName").focus()      // please take me to the form, I'm lazy
+        }
+    }
+
+    // -------------------- handleOnUpdate FUNCTION ----------------------------------------
+    // this one send an item to be updated to the backend API, which will update the DB
+    
+    const handleOnUpdate = async (evt) => 
+    {
+        evt.preventDefault                // don't refresh
+            await updateProduct(formData)   // call the API to update the product
+                .then((response) => {
+                    setAPIResponse(<>{response.data}</>)  // how was it?
+                })
+                setFormData(emptyForm)      // clean the form
+                setEditFlag(!editFlag)      // once updated, we get back to normal add button
+            
     }
 
     // -------------------- handleOnDelete FUNCTION ----------------------------------------
@@ -141,45 +192,6 @@ export default function GroceriesApp()
         })
     }
 
-    // -------------------- handleOnUpdate FUNCTION ----------------------------------------
-    // this one send an item to be updated to the backend API, which will update the DB
-    
-    const handleOnUpdate = async (evt) => {
-        evt.preventDefault()                // don't refresh
-        const pid = evt.target.value        // which button called this function?
-        if (pid === "update") {             // UPDATE button? this will try to commit the changes
-            console.log(pid)
-            console.log(formData)
-            await updateProduct(formData)   // call the API to update the product
-                .then((response) => {
-                    setAPIResponse(<>{response.data}</>)  // how was it?
-            })
-            setFormData(emptyForm)      // clean the form
-            setEditFlag(!editFlag)      // once updated, we get back to normal add button
-            }
-        else
-        {
-            if (pid === "cancel") {         // CANCEL button? no problema, get back to normal
-                setEditFlag(!editFlag)
-                setFormData(emptyForm)
-            }
-            else {
-                {setEditFlag(true)}         // EDIT button from InventoryCards?
-                const editar = products.filter((res) => (res._id === pid))  // then grab the produc info from the card (products object)
-                const dato = {                              // create another object with the product data to be put in the form
-                    _id:editar[0]._id,
-                    id:editar[0].id,
-                    productName: editar[0].productName,
-                    brand: editar[0].brand,
-                    quantity: editar[0].quantity,
-                    image: editar[0].image,
-                    price: editar[0].price,
-                }
-                setFormData(() => { return dato })                  // let's use our setFormData to modify our hook/state formData
-                document.getElementById("productName").focus()      // please take me to the form, I'm lazy
-            }
-        }
-    }
 
     /// thas it! now this is what our component renders!
     //      - InventoryForm     - to add and edit products
@@ -193,7 +205,12 @@ export default function GroceriesApp()
                 handleOnChange={handleOnChange}     // for instance, to see what we type
                 handleOnSubmit={handleOnSubmit}     // this form want's to send things like... products?
                 editFlag={editFlag}                 // toggle buttons for edit/add
-                handleOnUpdate={ handleOnUpdate } /> 
+                handleOnEdit={handleOnEdit}
+                handleOnUpdate={ handleOnUpdate }
+                register={register}                 // from react-hook-form 
+                handleSubmit={handleSubmit}
+                errors={errors}
+                clearErrors={clearErrors} /> 
             <p>{APIResponse}</p>
             <div className="GroceriesApp-Container">
                 {
@@ -207,7 +224,7 @@ export default function GroceriesApp()
                                     item={product}      // every item in inventory
                                     onClick={handleSubmission} // passing the function to Add current item to Cart
                                     onDelete={handleOnDelete}  // passing the function to handle click on delete button
-                                    handleOnUpdate={handleOnUpdate}
+                                    handleOnEdit={handleOnEdit}
                                 />
                                 )
                             )

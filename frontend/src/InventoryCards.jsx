@@ -5,7 +5,7 @@ it receives to props:
 - onClick, function to handle click on add-to-cart button
 */
 
-export default function InventoryCards({item, onClick, onDelete, handleOnUpdate})
+export default function InventoryCards({item, onClick, onDelete, handleOnEdit})
 {
 
 //let's convert the object into array to use map and render its contents in return function
@@ -27,7 +27,7 @@ return(
                                 ? <div id="button-container" key={data[0]}>
                                     <div><button className="btnInv" id={data["id"]} onClick={onClick} value={data[1]}>Add to cart</button></div>
                                     <span><button className="btnInv" onClick={onDelete} value={data[1]}>Delete</button>
-                                    <button className="btnInv" onClick={handleOnUpdate} value={data[1]}>Edit</button></span>
+                                    <button className="btnInv" onClick={handleOnEdit} value={data[1]}>Edit</button></span>
                                 </div>
                             : (data[0]==="image")                                               // image? then put it in a img tag
                             ? <img key={data[0]} src={data[1]}/>
