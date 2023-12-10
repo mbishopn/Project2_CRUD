@@ -1,11 +1,24 @@
 //2 -- in this component, we have a form to fill with data for the new product to be added
 
-import { appendErrors } from "react-hook-form";
+//import { appendErrors, useForm } from "react-hook-form";
 
 
-export default function InventoryForm({formData, handleOnChange, handleOnSubmit, editFlag, handleOnEdit, handleOnUpdate, register, handleSubmit, errors}) {
-    console.log(editFlag?"editando...":"edicion cancelada")
-    console.log("esto hay en el formulario");console.log(formData)
+export default function InventoryForm({
+    formData,           // holds the data to be sent, it seems this is not needed if using stateform but came from the first version
+    handleOnChange,     // handles changes on form fields
+    handleOnSubmit,     // processes submission for new products
+    editFlag,           // working on an existant product?
+    handleOnEdit,       // handles presentation for edition form
+    handleOnUpdate,     // processes submission for update products
+    register,           // to register fields to validate
+    handleSubmit,       // processes validation before sending data
+    errors              // holds validation errors
+})
+ {
+   // console.log(editFlag?"editting product: " + formData.productName + " id: " + formData._id:"adding mode...")
+   // console.log("esto hay en el formulario");console.log(formData)
+   // console.log(isValid)
+   console.log((editFlag?"edditing mode..."+formData.productName + " id: " + formData : "adding mode...") + (Object.keys(errors).length!==0?"errors found...":""))
     return (
         <div>
             <form action=""  /* onSubmit={handleSubmit(editFlag?{handleOnSubmit }:{handleOnUpdate})} */ >
@@ -57,8 +70,14 @@ export default function InventoryForm({formData, handleOnChange, handleOnSubmit,
                         onChange={handleOnChange}/>{errors.price?.message}
                     </div>
                     {(editFlag) ?           // different buttons when edit or add products
-                        <><button value="update" onClick={handleSubmit(handleOnUpdate)}>Update</button><button value="cancel" onClick={handleOnEdit}>Cancelar</button></>
+                        <>
+                            <button onClick={handleSubmit(handleOnSubmit)}>Copy to new Product</button> {/* why not? */}
+                            <button value="update" onClick={handleSubmit(handleOnUpdate)}>Update</button>
+                        </>
                         : <button onClick={handleSubmit(handleOnSubmit)}>Add Product</button>}
+                    { // cancel button will only show up when required
+                     (Object.keys(errors).length!==0||editFlag)?<button value="cancel" onClick={handleOnEdit}>Cancel</button>:<></> 
+                     }
                 </div>
             </form>
         </div>

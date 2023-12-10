@@ -39,7 +39,7 @@ export default function GroceriesApp()
     const [formData, setFormData] = useState(emptyForm);    // wanna control what happen in my form
     const [APIResponse, setAPIResponse] = useState("")      // Used to re-render every time API answers something
     const[editFlag,setEditFlag]=useState(false)             // flag to toggle form buttons for add/edit
-    const {register,handleSubmit, clearErrors, reset, setValue, getValues, formState:{errors}}=useForm({
+    const {register,handleSubmit, clearErrors, reset, setValue, getValues, formState:{errors, isValid}}=useForm({
         defaultValues:{         // let's define default values for the form
             productName:"",
             brand:"",
@@ -127,65 +127,57 @@ export default function GroceriesApp()
     }
 
     // -------------------- handleOnSubmit FUNCTION ----------------------------------------
-    // this one post the new product to the backend API, which will update the DB
+    // this one posts the new product to the backend API, which will update the DB
 
     const handleOnSubmit = async (evt) => {
         evt.preventDefault
+        console.log(formData._id?"Adding new product based on : "+formData.productName:"Adding new product")
         await createProduct(formData)
             .then((response) => {
-                console.log(response)
+                console.log(response[0].data + " with ID: " + response[1])   // log the addition
                 setAPIResponse(<>{response[0].data}</>)
-                reset()
-                //setFormData(emptyForm)
-                // window.alert(response[0].data + " Id: " + response[1])
+                setFormData(()=>{reset();return(emptyForm)})
+                setEditFlag(false)
+                window.alert(response[0].data + " Id: " + response[1])
             })
     }
 
 
 
     // -------------------- handleOnEdit FUNCTION ----------------------------------------
-    // this one send an item to be updated to the backend API, which will update the DB
+    // this one sends an item to be updated to the backend API, which will update the DB
     
     const handleOnEdit = async (evt) => 
     {
-        evt.preventDefault                // don't refresh
-        console.log(evt)
-        console.log("estoy cancelando")
+        evt.preventDefault()                // don't refresh
+        clearErrors()                       // clean form errors
         const pid = evt.target.value        // which button called this function?
         if (pid === "cancel")          // CANCEL button? no problema, get back to normal
         {
-            setEditFlag(!editFlag)
-            //reset()
+            console.log("Cancelling add/edit operation...")
+            setEditFlag(false)          
             setFormData(()=>{reset(); return emptyForm}) // clean form and formData variable
-            clearErrors()
-            console.log(formData)
-            console.log(getValues())
+           // console.log(formData)
         }
-        else 
+        else                            // EDIT button from InventoryCards? then pid has a product Id
         {
-            setEditFlag(true)         // EDIT button from InventoryCards?
-            const editar = products.filter((res) => (res._id === pid))  // then grab the produc info from the card (products object)
+            setEditFlag(true)           // put form in edit mode ( I know, it's only changing buttons names)
+            const editar = products.filter((res) => (res._id === pid))  // then grab the product info from the card (products object)
             const dato = {                              // create another object with the product data to be put in the form
-                _id:editar[0]._id,
-                id:editar[0].id,
-                // productName: editar[0].productName,
-                // brand: editar[0].brand,
-                // quantity: editar[0].quantity,
-                // image: editar[0].image,
-                // price: editar[0].price,
+                _id:editar[0]._id,                      // now with validations I only add Id's cause they're not user input
+                id:editar[0].id,                        
             }
             setFormData(() => {  // let's use our setFormData to modify our hook/state formData
                 
-                setValue("productName",editar[0].productName)
-                setValue("brand",editar[0].brand)
+                setValue("productName",editar[0].productName)  // setValue comes from useForm and I used to fill fields
+                setValue("brand",editar[0].brand)              // and prevent incorrect validations errors. 
                 setValue("quantity",editar[0].quantity)
                 setValue("image",editar[0].image)
                 setValue("price",editar[0].price)
                 return {...dato,...getValues()} })                 
 
             document.getElementById("productName").focus()      // please take me to the form, I'm lazy
-            console.log(formData)
-           // console.log(getValues())
+            console.log("Entering edit mode: ")
         }
     }
 
@@ -194,16 +186,14 @@ export default function GroceriesApp()
     
     const handleOnUpdate = async (evt) => 
     {
-        
-       // evt.preventDefault()                // don't refresh
+            // evt.preventDefault()                // don't refresh
+            console.log("Updating product: " + formData.productName + " id: " + formData._id)
             await updateProduct(formData)   // call the API to update the product
                 .then((response) => {
                     setAPIResponse(<>{response.data}</>)  // how was it?
                 })
-                reset()
                 setFormData(()=>{reset(); return emptyForm})      // clean the form
                 setEditFlag(!editFlag)      // once updated, we get back to normal add button
-            
     }
 
     // -------------------- handleOnDelete FUNCTION ----------------------------------------
@@ -211,10 +201,12 @@ export default function GroceriesApp()
     
     const handleOnDelete = async (evt) => {
         const id=evt.target.value                   // the button contains product Id as value, so I can identify the product to be deleted
+        console.log("Deleting product: " + id)
         await deleteProduct(id)                     // call the api
             .then((response) => {                   // once it gets back with a result, we send that to render
                 setAPIResponse(<>{response.data}</>)
                 window.alert(response.data)         // I added a pop-up just for fun!
+                //console.log("Product deleted")
         })
     }
 
@@ -233,12 +225,14 @@ export default function GroceriesApp()
                 editFlag={editFlag}                 // toggle buttons for edit/add
                 handleOnEdit={handleOnEdit}
                 handleOnUpdate={ handleOnUpdate }
-                register={register}                 // from react-hook-form 
-                handleSubmit={handleSubmit}
-                errors={errors}
-                clearErrors={clearErrors}
-                reset={reset} /> 
-            <p>{APIResponse}</p>
+                register={register}                 // from react-hook-form - register fields for validation
+                handleSubmit={handleSubmit}         // perfrom validations before sending the form
+                errors={errors}                     // something wrong? here you'll know
+                clearErrors={clearErrors}           // tired of those annoying error messages? get rid of them!
+                reset={reset}                       // just clean the form fields
+            />
+
+            <p>{APIResponse}</p>        { /* to show repsonses from API, outcomes for CRUD operations */}
             <div className="GroceriesApp-Container">
                 {
                     <div className="Inventory-Container">
@@ -251,7 +245,7 @@ export default function GroceriesApp()
                                     item={product}      // every item in inventory
                                     onClick={handleSubmission} // passing the function to Add current item to Cart
                                     onDelete={handleOnDelete}  // passing the function to handle click on delete button
-                                    handleOnEdit={handleOnEdit}
+                                    handleOnEdit={handleOnEdit}// passing the function to handle edit or cancel buttons
                                 />
                                 )
                             )

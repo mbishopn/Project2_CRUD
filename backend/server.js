@@ -18,7 +18,7 @@ server.use(cors())  // use cors to prevent browser locking
 
 // ---------- Connections
 mongoose.connect(db_uri)
-.then((result)=>{server.listen(port,()=>{console.log(`Listening on ${port}...\nConnect to DB`);})})
+.then((result)=>{server.listen(port,()=>{console.log(`Listening on ${port}...\nConnect to DB\nAwaiting requests...\n-`);})})
 .catch((error)=>{console.log(error);
 });
 
@@ -32,15 +32,15 @@ server.get("/",(request,response)=>{
 // this is the route to get all products from db, it returns and
 server.get("/products",async(request,response)=>{
     const products=await Product.find();
-    console.log("sending back all products in DB...")
+    console.log("READ and send all products in DB...\nDone.\n-")
     response.send(products);
 })
 
 // adding products to inventory
 server.post("/addProduct", async(request,response)=>{
     const product = request.body
-    console.log("I'm gonna save a new product...")
-    console.log(request.body)
+    console.log("CREATE a new product in DB...")
+    console.log(product)
     const newProduct=new Product({
         id: product.id,
         productName: product.productName,
@@ -49,7 +49,7 @@ server.post("/addProduct", async(request,response)=>{
         image: product.image,
         price: product.price,
     })
-    const saveProduct=await newProduct.save()
+    saveProduct = await newProduct.save().then(console.log("Done...\n-")).catch((error)=>console.log(error))
     saveProduct?response.send("Product was successfully added to inventory"):response.send("Failed to add!!!!!!!!")
 })
 
@@ -57,19 +57,18 @@ server.post("/addProduct", async(request,response)=>{
 server.patch("/updateProduct/:id", async (request, response) => {
     const { id } = request.params
     const product = request.body
-    console.log("Updating ...")
-    console.log(id)
+    console.log("UPDATE product in DB...")
     console.log(product)
     delete product._id              // I have to delete this Id here, otherwise can't commit the update.
-    const update = await Product.findByIdAndUpdate(id, product )
+    const update = await Product.findByIdAndUpdate(id, product ).then(console.log("Done...\n-")).catch((error)=>console.log(error))
     update?response.send("Product updated"):response.send("Update failed")
 })
 
 // deleting Items, by Id
 server.delete("/deleteProduct/:id", async(request,response)=>{
     const { id } = request.params
-    console.log("deleting" + id)
-    const delProduct= await Product.findByIdAndDelete(id)
+    console.log("DELETE product with id: " + id + " from DB")
+    const delProduct= await Product.findByIdAndDelete(id).then(console.log("Done...\n-")).catch((error)=>console.log(error))
     delProduct?response.send("Product deleted"):response.send("Deletion failed")
 
 })
